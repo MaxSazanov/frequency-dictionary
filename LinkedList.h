@@ -31,7 +31,7 @@ namespace List
     const_iterator cend() const;
 
     friend std::ostream& operator<<(std::ostream& out, const LinkedList& list);
-    bool insert(const T& newData);
+    std::pair<iterator, bool> insert(const T& newData);
     bool remove(const T& requiredData);
 
   private:
@@ -39,7 +39,7 @@ namespace List
 
     Node<T>* searchPrevious(const T& requiredData) const;
     Node<T>* searchFrom(Node<T>* begin, const T& requiredData) const;
-    bool insertAfter(Node<T>* begin, Node<T>* newNode);
+    std::pair<iterator, bool> insertAfter(Node<T>* begin, Node<T>* newNode);
   };
 
   template<class T>
@@ -133,14 +133,14 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other)
   }
 
   template<class T>
-  bool LinkedList<T>::insert(const T& newData)
+  std::pair<LinkedListIterator<T>, bool> LinkedList<T>::insert(const T& newData)
   {
-    auto* newNode = new Node(newData);
+    auto* newNode = new Node<T>(newData);
 
     if (!head_)
     {
       head_ = newNode;
-      return true;
+      return std::pair(LinkedListIterator<T>(head_), true);
     }
     return insertAfter(head_, newNode);
   }
@@ -221,24 +221,24 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other)
   }
 
   template<class T>
-  bool LinkedList<T>::insertAfter(Node<T>* begin, Node<T>* newNode)
+  std::pair<LinkedListIterator<T>, bool> LinkedList<T>::insertAfter(Node<T>* begin, Node<T>* newNode)
   {
     Node<T>* current = begin;
     if (begin->data_ == newNode->data_)
     {
-      return false;
+      return std::pair(LinkedListIterator<T>(begin), false);
     }
 
     while (current->next_ != nullptr)
     {
-      if (current->next_->data_ == newNode->next_->data_)
+      if (current->next_->data_ == newNode->data_)
       {
-        return false;
+        return std::pair(LinkedListIterator<T>(current->next_), false);
       }
     }
 
     current->next_ = newNode;
-    return true;
+    return std::pair(LinkedListIterator<T>(newNode), true);
   }
 }
 

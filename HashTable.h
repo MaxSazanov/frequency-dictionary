@@ -17,7 +17,7 @@ public:
   HashTable& operator=(const HashTable& src) = delete;
   HashTable& operator=(HashTable&& src) = delete;
 
-  bool insert(const Key& key, const T& value = T());
+  std::pair<T&, bool> insert(const Key& key, const T& value = T());
   T& operator[](const Key& key);
   bool erase(const Key& key);
 
@@ -37,7 +37,6 @@ private:
   {
     hash = Hash{}(key);
   };
-  Pair* searchPair(const char* key) const;
 };
 
 template<class Key, class T, class Hash>
@@ -60,9 +59,11 @@ HashTable< Key, T, Hash >::HashTable(std::size_t size):
 }
 
 template < class Key, class T, class Hash >
-bool HashTable< Key, T, Hash >::insert(const Key& key, const T& value)
+std::pair<T&, bool> HashTable< Key, T, Hash >::insert(const Key& key, const T& value)
 {
-  return table[getHash(key)].insert(Pair{key, value});
+  LinkedList<Pair>& bucket = table[getHash(key)];
+  auto insertionResult = bucket.insert(Pair{key, value});
+  return std::pair<T&, bool>((*insertionResult.first).value_, insertionResult.second);
 }
 
 template < class Key, class T, class Hash >
@@ -72,20 +73,6 @@ std::size_t HashTable< Key, T, Hash >::getHash(const Key& key) const requires re
 }
 {
   return Hash{}(key) % bucketCount;
-}
-
-template < class Key, class T, class Hash >
-HashTable< Key, T, Hash >::Pair* HashTable< Key, T, Hash >::searchPair(const char* key) const
-{
-  LinkedList<Pair>& bucket = table[getHash(key)];
-  for (Pair& pair : bucket)
-  {
-    if (*key == *pair.key_)
-    {
-      return &pair;
-    }
-  }
-  return nullptr;
 }
 
 template < class Key, class T, class Hash >
@@ -99,17 +86,7 @@ T& HashTable< Key, T, Hash >::operator[](const Key& key)
       return pair.value_;
     }
   }
-  if (!insert(key))
-  {
-    throw std::logic_error("INVALID_ARGUMENT");
-  }
-  for (Pair& pair : bucket)
-  {
-    if (key == pair.key_)
-    {
-      return pair.value_;
-    }
-  }
+  return insert(key).first;
 }
 
 #endif //HASH_TABLE_H
