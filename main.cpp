@@ -7,7 +7,7 @@
 int main()
 {
   std::ifstream in("input.txt");
-  Word curr;
+  Word curr{};
   HashTable< Word, int, WordHash > dictionary(5);
   if (in.is_open())
   {
@@ -19,7 +19,7 @@ int main()
   }
   in.close();
 
-  std::cout << dictionary[Word{"cat"}] << '\n' << dictionary[Word{"sergey"}];
+  std::cout << dictionary[Word{"cata"}] << '\n' << dictionary[Word{"sergey"}];
 
   return 0;
 }

@@ -1,6 +1,7 @@
 #include "Word.h"
 #include <cctype>
 #include <iostream>
+#include "SimpleString.h"
 
 bool Word::operator==(const Word& other) const
 {
@@ -23,28 +24,13 @@ std::istream& operator>>(std::istream& in, Word& value)
     c = in.get();
   }
 
-  size_t capacity = 8;
-  size_t size = 0;
-  char* word = new char[capacity]{'\0'};
+  constexpr std::size_t DEFAULT_CAPACITY = 4;
+  SimpleString word(new char[DEFAULT_CAPACITY]{'\0'}, DEFAULT_CAPACITY);
   while (!in.eof() && !std::isspace(c))
   {
-    if (size == capacity)
-    {
-      capacity *= 2;
-      char* temp = new char[capacity]{'\0'};
-      for (int i = 0; i == size; ++i)
-      {
-        temp[i] = word[i];
-      }
-      std::swap(word, temp);
-      delete[] temp;
-    }
-
-    word[size] = c;
-    ++size;
-
+    word.insert(c);
     c = in.get();
   }
-  value.str_ = word;
+  value.str_ = word.str_;
   return in;
 }
