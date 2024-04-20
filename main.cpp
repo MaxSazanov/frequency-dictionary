@@ -10,25 +10,25 @@ int main()
 {
   std::ifstream in("input.txt");
   Word curr{};
-  HashTable< Word, int, WordHash > dictionary(5);
+  HashTable< Word, int, WordHash > frequencyDictionary(100);
   if (in.is_open())
   {
     while (!in.eof())
     {
       in >> curr;
-      dictionary[curr] += 1;
+      frequencyDictionary[curr] += 1;
     }
   }
   in.close();
 
-  std::cout << dictionary.insert(Word{"cata"}, 0).second << '\n';
+  std::cout << frequencyDictionary.insert(Word{"cata"}, 0).second << '\n';
 
-  for (Pair<Word, int>& pair : dictionary)
+  for (Pair<Word, int>& pair : frequencyDictionary)
   {
     std::cout << pair.key_.str_ << '\n';
   }
 
-  std::cout << dictionary[Word{"cata"}] << '\n' << dictionary[Word{"sergey"}];
+  std::cout << frequencyDictionary[Word{"cata"}] << '\n' << frequencyDictionary[Word{"sergey"}];
 
   return 0;
 }

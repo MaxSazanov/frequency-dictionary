@@ -39,6 +39,10 @@ namespace Table
     end_(end)
   {
     listIterator_ = bucket->begin();
+    if (listIterator_ == bucket_->end() && bucket_ != end_)
+    {
+      ++(*this);
+    }
   }
 
   template< class Key, class Value, class Hash>
@@ -68,7 +72,10 @@ namespace Table
   template< class Key, class Value, class Hash>
   HashTableIterator<Key, Value, Hash>& HashTableIterator<Key, Value, Hash>::operator++()
   {
-    ++listIterator_;
+    if (listIterator_ != bucket_->end())
+    {
+      ++listIterator_;
+    }
     while (listIterator_ == bucket_->end() && bucket_ != end_)
     {
       ++bucket_;
