@@ -3,7 +3,7 @@
 
 namespace List
 {
-  template <class T>
+  template < class T >
   struct Node
   {
     T data_;

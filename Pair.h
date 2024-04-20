@@ -13,7 +13,7 @@ namespace Table
   };
 
   template < class Key, class Value >
-  bool Pair<Key, Value>::operator==(const Pair& other) const
+  bool Pair< Key, Value >::operator==(const Pair& other) const
   {
     return key_ == other.key_;
   }
