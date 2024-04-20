@@ -4,6 +4,8 @@
 #include "WordHash.h"
 #include "HashTable.h"
 
+using namespace Table;
+
 int main()
 {
   std::ifstream in("input.txt");
@@ -18,6 +20,13 @@ int main()
     }
   }
   in.close();
+
+  std::cout << dictionary.insert(Word{"cata"}, 0).second << '\n';
+
+  for (Pair<Word, int>& pair : dictionary)
+  {
+    std::cout << pair.key_.str_ << '\n';
+  }
 
   std::cout << dictionary[Word{"cata"}] << '\n' << dictionary[Word{"sergey"}];
 

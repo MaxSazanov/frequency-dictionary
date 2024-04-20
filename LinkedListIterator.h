@@ -1,6 +1,7 @@
 #ifndef LINKED_LIST_ITERATOR_H
 #define LINKED_LIST_ITERATOR_H
 
+#include <iterator>
 #include "Node.h"
 
 namespace List

@@ -17,7 +17,7 @@ namespace List
     LinkedList(const LinkedList& other) = delete;
 
     ~LinkedList();
-    LinkedList& operator=(const LinkedList& other) = delete;
+    LinkedList& operator=(const LinkedList& other);
     LinkedList& operator=(LinkedList&& other) noexcept;
     friend class LinkedListIterator<T>;
     using iterator = LinkedListIterator<T>;
@@ -65,19 +65,18 @@ namespace List
     other.head_ = nullptr;
   }
 
-/*
-template<class T>
-LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other)
-{
-  ~LinkedList();
-  Node* otherCurr = other.head_;
-  while (otherCurr != nullptr)
+  template<class T>
+  LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other)
   {
-    insert(otherCurr->data_);
+    ~LinkedList();
+    Node<T>* otherCurr = other.head_;
+    while (otherCurr != nullptr)
+    {
+      insert(otherCurr->data_);
+    }
+    return *this;
   }
-  return *this;
-}
-*/
+
   template<class T>
   LinkedList<T>& LinkedList<T>::operator=(LinkedList&& other) noexcept
   {
@@ -99,25 +98,25 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other)
   template <class T>
   LinkedList<T>::iterator LinkedList<T>::begin()
   {
-    return iterator(head_);
+    return LinkedList::iterator(head_);
   }
 
   template <class T>
   LinkedList<T>::iterator LinkedList<T>::end()
   {
-    return iterator(nullptr);
+    return LinkedList::iterator(nullptr);
   }
 
   template <class T>
   LinkedList<T>::const_iterator LinkedList<T>::cbegin() const
   {
-    return const_iterator(head_);
+    return LinkedList::const_iterator(head_);
   }
 
   template <class T>
   LinkedList<T>::const_iterator LinkedList<T>::cend() const
   {
-    return const_iterator(nullptr);
+    return LinkedList::const_iterator(nullptr);
   }
 
   template<class T>
