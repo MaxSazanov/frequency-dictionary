@@ -3,112 +3,147 @@
 
 #include <iostream>
 #include <exception>
+#include "Pair.h"
 #include "LinkedList.h"
+#include "HashTableIterator.h"
 
 using namespace List;
 
-template < class Key, class T, class Hash = std::hash< Key > >
-class HashTable
+namespace Table
 {
-public:
-  explicit HashTable(size_t size);
-  HashTable(const HashTable& table) = delete;
-  HashTable(HashTable&& table) = delete;
-  HashTable& operator=(const HashTable& src) = delete;
-  HashTable& operator=(HashTable&& src) = delete;
-
-  bool insert(const Key& key, const T& value = T());
-  T& operator[](const Key& key);
-  bool erase(const Key& key);
-
-private:
-  struct Pair
+  template < class Key, class Value, class Hash = std::hash< Key > >
+  class HashTable
   {
-    Key key_;
-    T value_;
+  public:
+    explicit HashTable(size_t size);
+    HashTable(const HashTable& rhs);
+    HashTable(HashTable&& table) = delete;
+    ~HashTable();
 
-    bool operator==(const Pair& other) const;
+    HashTable& operator=(const HashTable& rhs);
+    HashTable& operator=(HashTable&& src) = delete;
+
+    friend class HashTableIterator< Key, Value, Hash >;
+    using iterator = HashTableIterator< Key, Value, Hash >;
+    using const_iterator = HashTableIterator< Key, const Value, Hash >;
+
+    iterator begin();
+    iterator end();
+
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+
+    std::pair< Value&, bool > insert(const Key& key, const Value& value = Value());
+    Value& operator[](const Key& key);
+    bool erase(const Key& key);
+
+  private:
+    using Bucket = LinkedList< Pair< Key, Value > >;
+    Bucket* table_;
+    std::size_t bucketCount_;
+
+    std::size_t getHash(const Key& key) const requires requires (std::size_t hash)
+    {
+      hash = Hash{}(key);
+    };
   };
 
-  LinkedList<Pair>* table;
-  std::size_t bucketCount;
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >& HashTable< Key, Value, Hash >::operator=(const HashTable& rhs)
+  {
+    delete[] table_;
 
-  std::size_t getHash(const Key& key) const requires requires (std::size_t hash)
+    bucketCount_ = rhs.bucketCount_;
+    table_ = new Bucket[bucketCount_];
+    for (int i = 0; i < bucketCount_; ++i)
+    {
+      table_[i] = rhs.table_[i];
+    }
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::HashTable(const HashTable& rhs) :
+    bucketCount_(rhs.bucketCount_)
+  {
+    table_ = new Bucket[rhs.bucketCount_];
+    for (int i = 0; i < bucketCount_; ++i)
+    {
+      table_[i] = rhs.table_[i];
+    }
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::~HashTable()
+  {
+    delete[] table_;
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::const_iterator HashTable< Key, Value, Hash >::cend() const
+  {
+    return HashTable::const_iterator(table_ + bucketCount_, table_ + bucketCount_);
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::const_iterator HashTable< Key, Value, Hash >::cbegin() const
+  {
+    return HashTable::const_iterator(table_, table_ + bucketCount_);
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::iterator HashTable< Key, Value, Hash >::end()
+  {
+    return HashTable::iterator(table_ + bucketCount_, table_ + bucketCount_);
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::iterator HashTable< Key, Value, Hash >::begin()
+  {
+    return HashTable::iterator(table_, table_ + bucketCount_);
+  }
+
+  template< class Key, class Value, class Hash >
+  bool HashTable< Key, Value, Hash >::erase(const Key& key)
+  {
+    return table_[getHash(key)].remove(Pair{key, 0});;
+  }
+
+  template < class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >::HashTable(std::size_t size):
+    bucketCount_(size)
+  {
+    table_ = new Bucket[bucketCount_];
+  }
+
+  template < class Key, class Value, class Hash >
+  std::pair< Value&, bool > HashTable< Key, Value, Hash >::insert(const Key& key, const Value& value)
+  {
+    Bucket& bucket = table_[getHash(key)];
+    const auto& insertionResult = bucket.insert(Pair{key, value});
+    return std::pair< Value&, bool >((*insertionResult.first).value_, insertionResult.second);
+  }
+
+  template < class Key, class Value, class Hash >
+  std::size_t HashTable< Key, Value, Hash >::getHash(const Key& key) const requires requires (std::size_t hash)
   {
     hash = Hash{}(key);
-  };
-  Pair* searchPair(const char* key) const;
-};
-
-template<class Key, class T, class Hash>
-bool HashTable<Key, T, Hash>::erase(const Key& key)
-{
-  return table[getHash(key)].remove(Pair{key, 0});;
-}
-
-template < class Key, class T, class Hash >
-bool HashTable< Key, T, Hash >::Pair::operator==(const HashTable::Pair& other) const
-{
-  return key_ == other.key_;
-}
-
-template < class Key, class T, class Hash >
-HashTable< Key, T, Hash >::HashTable(std::size_t size):
-  bucketCount(size)
-{
-  table = new LinkedList<Pair>[bucketCount];
-}
-
-template < class Key, class T, class Hash >
-bool HashTable< Key, T, Hash >::insert(const Key& key, const T& value)
-{
-  return table[getHash(key)].insert(Pair{key, value});
-}
-
-template < class Key, class T, class Hash >
-std::size_t HashTable< Key, T, Hash >::getHash(const Key& key) const requires requires (std::size_t hash)
-{
-  hash = Hash{}(key);
-}
-{
-  return Hash{}(key) % bucketCount;
-}
-
-template < class Key, class T, class Hash >
-HashTable< Key, T, Hash >::Pair* HashTable< Key, T, Hash >::searchPair(const char* key) const
-{
-  LinkedList<Pair>& bucket = table[getHash(key)];
-  for (Pair& pair : bucket)
-  {
-    if (*key == *pair.key_)
-    {
-      return &pair;
-    }
   }
-  return nullptr;
-}
+  {
+    return Hash{}(key) % bucketCount_;
+  }
 
-template < class Key, class T, class Hash >
-T& HashTable< Key, T, Hash >::operator[](const Key& key)
-{
-  LinkedList<Pair>& bucket = table[getHash(key)];
-  for (Pair& pair : bucket)
+  template < class Key, class Value, class Hash >
+  Value& HashTable< Key, Value, Hash >::operator[](const Key& key)
   {
-    if (key == pair.key_)
+    Bucket& bucket = table_[getHash(key)];
+    for (Pair< Key, Value >& pair : bucket)
     {
-      return pair.value_;
+      if (key == pair.key_)
+      {
+        return pair.value_;
+      }
     }
-  }
-  if (!insert(key))
-  {
-    throw std::logic_error("INVALID_ARGUMENT");
-  }
-  for (Pair& pair : bucket)
-  {
-    if (key == pair.key_)
-    {
-      return pair.value_;
-    }
+    return insert(key).first;
   }
 }
 

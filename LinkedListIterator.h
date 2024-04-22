@@ -1,17 +1,18 @@
 #ifndef LINKED_LIST_ITERATOR_H
 #define LINKED_LIST_ITERATOR_H
 
+#include <iterator>
 #include "Node.h"
 
 namespace List
 {
-  template <class T>
+  template < class T >
   class LinkedList;
 
-  template<class T>
-  class LinkedListIterator: public std::iterator<std::forward_iterator_tag, T>
+  template< class T >
+  class LinkedListIterator: public std::iterator< std::forward_iterator_tag, T >
   {
-    friend class LinkedList<T>;
+    friend class LinkedList< T >;
   public:
     LinkedListIterator(const LinkedListIterator& it);
 
@@ -21,40 +22,40 @@ namespace List
 
     LinkedListIterator& operator++();
   private:
-    Node<T>* node_;
-    explicit LinkedListIterator(Node<T>* node);
+    Node< T >* node_;
+    explicit LinkedListIterator(Node< T >* node);
   };
 
-  template<class T>
-  LinkedListIterator<T>::LinkedListIterator(Node<T>* node) :
+  template< class T >
+  LinkedListIterator< T >::LinkedListIterator(Node< T >* node) :
     node_(node)
   {}
 
-  template<class T>
-  LinkedListIterator<T>::LinkedListIterator(const LinkedListIterator& it) :
+  template< class T >
+  LinkedListIterator< T >::LinkedListIterator(const LinkedListIterator& it) :
     node_(it.node_)
   {}
 
-  template<class T>
-  bool LinkedListIterator<T>::operator!=(const LinkedListIterator& other) const
+  template< class T >
+  bool LinkedListIterator< T >::operator!=(const LinkedListIterator& other) const
   {
     return node_ != other.node_;
   }
 
-  template<class T>
-  bool LinkedListIterator<T>::operator==(const LinkedListIterator& other) const
+  template< class T >
+  bool LinkedListIterator< T >::operator==(const LinkedListIterator& other) const
   {
     return node_ == other.node_;
   }
 
-  template<class T>
-  T& LinkedListIterator<T>::operator*() const
+  template< class T >
+  T& LinkedListIterator< T >::operator*() const
   {
     return node_->data_;
   }
 
-  template<typename T>
-  LinkedListIterator<T>& LinkedListIterator<T>::operator++()
+  template< typename T >
+  LinkedListIterator< T >& LinkedListIterator< T >::operator++()
   {
     node_ = node_->next_;
     return *this;
