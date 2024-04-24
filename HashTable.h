@@ -16,11 +16,11 @@ namespace Table
   {
   public:
     explicit HashTable(size_t size);
-    HashTable(const HashTable& rhs);
+    HashTable(const HashTable& other);
     HashTable(HashTable&& table) = delete;
     ~HashTable();
 
-    HashTable& operator=(const HashTable& rhs);
+    HashTable& operator=(const HashTable& other);
     HashTable& operator=(HashTable&& src) = delete;
 
     friend class HashTableIterator< Key, Value, Hash >;
@@ -49,26 +49,26 @@ namespace Table
   };
 
   template< class Key, class Value, class Hash >
-  HashTable< Key, Value, Hash >& HashTable< Key, Value, Hash >::operator=(const HashTable& rhs)
+  HashTable< Key, Value, Hash >& HashTable< Key, Value, Hash >::operator=(const HashTable& other)
   {
     delete[] table_;
 
-    bucketCount_ = rhs.bucketCount_;
+    bucketCount_ = other.bucketCount_;
     table_ = new Bucket[bucketCount_];
     for (int i = 0; i < bucketCount_; ++i)
     {
-      table_[i] = rhs.table_[i];
+      table_[i] = other.table_[i];
     }
   }
 
   template< class Key, class Value, class Hash >
-  HashTable< Key, Value, Hash >::HashTable(const HashTable& rhs) :
-    bucketCount_(rhs.bucketCount_)
+  HashTable< Key, Value, Hash >::HashTable(const HashTable& other) :
+    bucketCount_(other.bucketCount_)
   {
-    table_ = new Bucket[rhs.bucketCount_];
+    table_ = new Bucket[other.bucketCount_];
     for (int i = 0; i < bucketCount_; ++i)
     {
-      table_[i] = rhs.table_[i];
+      table_[i] = other.table_[i];
     }
   }
 

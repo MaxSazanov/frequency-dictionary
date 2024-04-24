@@ -16,6 +16,12 @@ bool Word::operator==(const Word& other) const
   return other.str_[i] == '\0';
 }
 
+std::ostream& operator<<(std::ostream& out, Word& word)
+{
+  out << word.str_;
+  return out;
+}
+
 std::istream& operator>>(std::istream& in, Word& value)
 {
   char c = ' ';
@@ -28,7 +34,10 @@ std::istream& operator>>(std::istream& in, Word& value)
   SimpleString word(new char[DEFAULT_CAPACITY]{'\0'}, DEFAULT_CAPACITY);
   while (!in.eof() && !std::isspace(c))
   {
-    word.insert(c);
+    if (std::isalpha(c))
+    {
+      word.insert(c);
+    }
     c = in.get();
   }
   value.str_ = word.str_;

@@ -14,7 +14,6 @@ namespace List
       next_(nullptr)
     {}
   };
-
 }
 
 #endif //NODE_H

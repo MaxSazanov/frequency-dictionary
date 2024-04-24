@@ -15,4 +15,6 @@ add_executable(FrequencyDictionary main.cpp
         SimpleString.cpp
         SimpleString.h
         HashTableIterator.h
-        Pair.h)
+        Pair.h
+        FrequencyDictionary.cpp
+        FrequencyDictionary.h)

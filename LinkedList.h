@@ -187,10 +187,10 @@ namespace List
   }
 
   template< class T >
-  Node<T>* LinkedList<T>::searchPrevious(const T& requiredData) const
+  Node< T >* LinkedList< T >::searchPrevious(const T& requiredData) const
   {
-    Node<T>* current = head_;
-    Node<T>* next = head_->next_;
+    Node< T >* current = head_;
+    Node<  T>* next = head_->next_;
 
     while (next)
     {
@@ -207,7 +207,7 @@ namespace List
   }
 
   template< class T >
-  Node< T >* LinkedList< T >::searchFrom(Node<T>* begin, const T& requiredData) const
+  Node< T >* LinkedList< T >::searchFrom(Node< T >* begin, const T& requiredData) const
   {
     Node< T >* current = begin;
 

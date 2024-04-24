@@ -11,6 +11,7 @@ struct Word
   bool operator==(const Word& other) const;
 };
 
+std::ostream& operator<<(std::ostream& out, Word& value);
 std::istream& operator>>(std::istream& in, Word& value);
 
 #endif //WORD_H
