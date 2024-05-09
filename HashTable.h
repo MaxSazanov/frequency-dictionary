@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <exception>
+#include <vector>
 #include "Pair.h"
 #include "LinkedList.h"
 #include "HashTableIterator.h"
@@ -15,7 +16,7 @@ namespace Table
   class HashTable
   {
   public:
-    explicit HashTable(size_t size);
+    explicit HashTable(std::size_t capacity);
     HashTable(const HashTable& other);
     HashTable(HashTable&& table) = delete;
     ~HashTable();
@@ -39,8 +40,10 @@ namespace Table
 
   private:
     using Bucket = LinkedList< Pair< Key, Value > >;
+
     Bucket* table_;
     std::size_t bucketCount_;
+    std::vector<Value*> values_;
 
     std::size_t getHash(const Key& key) const requires requires (std::size_t hash)
     {
@@ -109,8 +112,8 @@ namespace Table
   }
 
   template < class Key, class Value, class Hash >
-  HashTable< Key, Value, Hash >::HashTable(std::size_t size):
-    bucketCount_(size)
+  HashTable< Key, Value, Hash >::HashTable(std::size_t capacity):
+    bucketCount_(capacity)
   {
     table_ = new Bucket[bucketCount_];
   }

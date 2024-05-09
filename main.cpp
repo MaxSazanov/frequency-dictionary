@@ -5,8 +5,6 @@
 #include "HashTable.h"
 #include "FrequencyDictionary.h"
 
-// using namespace Table;
-
 int main()
 {
   std::ifstream in1("input.txt");
@@ -22,20 +20,33 @@ int main()
   }
   in1.close();
 
-  HashTable< Word, int, WordHash > frequencyDictionary2(frequencyDictionary);
+  FrequencyDictionary frequencyDictionary2(frequencyDictionary);
   std::cout << frequencyDictionary2.insert(Word{"cata"}, 0).second << '\n';
 
-  for (Pair< Word, int >& pair : frequencyDictionary)
+  for (Pair< Word, int >& pair : frequencyDictionary2)
   {
     std::cout << pair.key_.str_ << '\n';
   }
 
-  std::cout << frequencyDictionary2[Word{"cata"}] << '\n' << frequencyDictionary[Word{"sergey"}] << '\n';
+  std::cout << frequencyDictionary2[Word{"cata"}] << '\n' << frequencyDictionary2[Word{"sergey"}] << '\n';
 
-  frequencyDictionary[Word{"sergey"}] = 50;
-  frequencyDictionary[Word{"cata"}] = 20;
-  frequencyDictionary[Word{"man"}] = 10;
-  frequencyDictionary.getThreeMostFrequent(std::cout);
+  frequencyDictionary2[Word{"sergey"}] = 50;
+  frequencyDictionary2[Word{"cata"}] = 20;
+  frequencyDictionary2[Word{"man"}] = 10;
+  frequencyDictionary2[Word{"repapa"}] = 5;
+  frequencyDictionary2.getThreeMostFrequent();
+
+  frequencyDictionary2[Word{"man"}] = 100;
+  std::cout << '\n';
+  frequencyDictionary2.getThreeMostFrequent();
+
+  frequencyDictionary2.erase(Word{"sergey"});
+  std::cout << '\n';
+  frequencyDictionary2.getThreeMostFrequent();
+
+  FrequencyDictionary frequencyDictionary3(100);
+  frequencyDictionary3.getThreeMostFrequent();
+
   /*
   std::ifstream in("input.txt");
   HashTable< Word, int, WordHash > dictionary(100);

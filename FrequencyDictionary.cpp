@@ -1,3 +1,4 @@
+#include <iostream>
 #include "FrequencyDictionary.h"
 #include "Pair.h"
 
@@ -34,6 +35,6 @@ void FrequencyDictionary::getThreeMostFrequent(std::ostream& out)
   out << first.key_ << ' ' << second.key_ << ' ' << third.key_;
 }
 
-FrequencyDictionary::FrequencyDictionary(std::size_t size) :
-  HashTable(size)
+FrequencyDictionary::FrequencyDictionary(std::size_t capacity) :
+  HashTable(capacity)
 {}

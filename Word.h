@@ -3,10 +3,11 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include <string>
 
 struct Word
 {
-  char* str_;
+  std::string str_;
 
   bool operator==(const Word& other) const;
 };

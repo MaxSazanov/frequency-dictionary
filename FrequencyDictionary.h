@@ -10,8 +10,8 @@ using namespace Table;
 class FrequencyDictionary : public HashTable< Word, int, WordHash >
 {
   public:
-    explicit FrequencyDictionary(std::size_t size);
-    void getThreeMostFrequent(std::ostream& out);
+    explicit FrequencyDictionary(std::size_t capacity);
+    void getThreeMostFrequent(std::ostream& out = std::cout);
 };
 
 #endif //FREQUENCY_DICTIONARY_HPP

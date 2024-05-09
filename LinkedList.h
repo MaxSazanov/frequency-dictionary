@@ -59,7 +59,7 @@ namespace List
   }
 
   template< class T >
-  LinkedList<T>::LinkedList(LinkedList&& other) noexcept:
+  LinkedList< T >::LinkedList(LinkedList&& other) noexcept:
     head_(other.head_)
   {
     other.head_ = nullptr;
@@ -190,7 +190,7 @@ namespace List
   Node< T >* LinkedList< T >::searchPrevious(const T& requiredData) const
   {
     Node< T >* current = head_;
-    Node<  T>* next = head_->next_;
+    Node< T >* next = head_->next_;
 
     while (next)
     {
@@ -225,7 +225,7 @@ namespace List
   }
 
   template< class T >
-  std::pair<LinkedListIterator< T >, bool> LinkedList< T >::insertAfter(Node< T >* begin, Node< T >* newNode)
+  std::pair< LinkedListIterator< T >, bool > LinkedList< T >::insertAfter(Node< T >* begin, Node< T >* newNode)
   {
     Node< T >* current = begin;
     if (begin->data_ == newNode->data_)
