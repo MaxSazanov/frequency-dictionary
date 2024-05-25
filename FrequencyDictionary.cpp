@@ -4,12 +4,11 @@
 
 void FrequencyDictionary::getThreeMostFrequent(std::ostream& out)
 {
-  auto begin = this->begin();
   Pair<Word, int> first{"", -1};
   Pair<Word, int> second{"", -1};
   Pair<Word, int> third{"", -1};
 
-  for (Pair< Word, int >& pair : *this)
+  for (Pair< Word, int >& pair : table_)
   {
     if (pair.value_ > first.value_)
     {
@@ -35,6 +34,61 @@ void FrequencyDictionary::getThreeMostFrequent(std::ostream& out)
   out << first.key_ << ' ' << second.key_ << ' ' << third.key_;
 }
 
-FrequencyDictionary::FrequencyDictionary(std::size_t capacity) :
-  HashTable(capacity)
+FrequencyDictionary::FrequencyDictionary(std::size_t capacity):
+  table_(capacity)
 {}
+
+void FrequencyDictionary::insert(const Word& word)
+{
+  table_[word] += 1;
+}
+
+int& FrequencyDictionary::operator[](const Word& word)
+{
+  return table_[word];
+}
+
+FrequencyDictionary::iterator FrequencyDictionary::begin()
+{
+  return table_.begin();
+}
+
+FrequencyDictionary::iterator FrequencyDictionary::end()
+{
+  return table_.end();
+}
+
+bool FrequencyDictionary::erase(const Word& word)
+{
+  return table_.erase(word);
+}
+
+FrequencyDictionary::FrequencyDictionary(const FrequencyDictionary& other):
+  table_()
+{
+  HashTable< Word, int, WordHash > temp(other.table_);
+  std::swap(table_, temp);
+}
+
+FrequencyDictionary::FrequencyDictionary(FrequencyDictionary&& other) noexcept:
+  table_(std::move(other.table_))
+{}
+
+FrequencyDictionary& FrequencyDictionary::operator=(const FrequencyDictionary& other)
+{
+  if (this != &other)
+  {
+    HashTable< Word, int, WordHash > temp(other.table_);
+    std::swap(table_, temp);
+  }
+  return *this;
+}
+
+FrequencyDictionary& FrequencyDictionary::operator=(FrequencyDictionary&& other) noexcept
+{
+  if (this != &other)
+  {
+    table_ = std::move(other.table_);
+  }
+  return *this;
+}

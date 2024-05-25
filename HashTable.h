@@ -16,13 +16,14 @@ namespace Table
   class HashTable
   {
   public:
+    HashTable();
     explicit HashTable(std::size_t capacity);
     HashTable(const HashTable& other);
-    HashTable(HashTable&& table) = delete;
+    HashTable(HashTable&& other) noexcept;
     ~HashTable();
 
     HashTable& operator=(const HashTable& other);
-    HashTable& operator=(HashTable&& src) = delete;
+    HashTable& operator=(HashTable&& other) noexcept;
 
     friend class HashTableIterator< Key, Value, Hash >;
     using iterator = HashTableIterator< Key, Value, Hash >;
@@ -34,16 +35,15 @@ namespace Table
     const_iterator cbegin() const;
     const_iterator cend() const;
 
-    std::pair< Value&, bool > insert(const Key& key, const Value& value = Value());
+    std::pair< iterator, bool > insert(const Key& key, const Value& value = Value());
     Value& operator[](const Key& key);
     bool erase(const Key& key);
-
+    void rehash(std::size_t count);
   private:
     using Bucket = LinkedList< Pair< Key, Value > >;
-
     Bucket* table_;
-    std::size_t bucketCount_;
-    std::vector<Value*> values_;
+    std::size_t bucketCapacity_;
+    std::size_t loadFactor_;
 
     std::size_t getHash(const Key& key) const requires requires (std::size_t hash)
     {
@@ -51,28 +51,76 @@ namespace Table
     };
   };
 
+  template<class Key, class Value, class Hash>
+  HashTable<Key, Value, Hash>::HashTable():
+    loadFactor_(0),
+    bucketCapacity_(0),
+    table_(nullptr)
+  {}
+
+  template< class Key, class Value, class Hash >
+  void HashTable< Key, Value, Hash >::rehash(std::size_t count)
+  {
+    HashTable< Key, Value, Hash > temp(count);
+    for (Pair< Key, Value >& pair : *this)
+    {
+      auto res = temp.insert(pair.key_, pair.value_);
+    }
+    bucketCapacity_ = temp.bucketCapacity_;
+    std::swap(this->table_, temp.table_);
+  }
+
+  template< class Key, class Value, class Hash >
+  HashTable< Key, Value, Hash >& HashTable< Key, Value, Hash >::operator=(HashTable&& other) noexcept
+  {
+    if (this != &other)
+    {
+      bucketCapacity_ = other.bucketCapacity_;
+      loadFactor_ = other.loadFactor_;
+      table_ = std::move(other.table_);
+    }
+    return *this;
+  }
+
+  template<class Key, class Value, class Hash>
+  HashTable<Key, Value, Hash>::HashTable(HashTable&& other) noexcept:
+    bucketCapacity_(other.bucketCapacity_),
+    loadFactor_(other.loadFactor_),
+    table_(nullptr)
+  {
+    std::swap(table_, other.table_);
+  }
+
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >& HashTable< Key, Value, Hash >::operator=(const HashTable& other)
   {
-    delete[] table_;
-
-    bucketCount_ = other.bucketCount_;
-    table_ = new Bucket[bucketCount_];
-    for (int i = 0; i < bucketCount_; ++i)
+    if (this != &other)
     {
-      table_[i] = other.table_[i];
+      HashTable< Key, Value, Hash > temp(other.bucketCapacity_);
+      for (int i = 0; i < bucketCapacity_; ++i)
+      {
+        temp.table_[i] = other.table_[i];
+      }
+      bucketCapacity_ = other.bucketCapacity_;
+      loadFactor_ = other.loadFactor_;
+      std::swap(table_, temp.table_);
     }
+    return *this;
   }
 
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::HashTable(const HashTable& other) :
-    bucketCount_(other.bucketCount_)
+    bucketCapacity_(other.bucketCapacity_),
+    loadFactor_(other.loadFactor_),
+    table_(nullptr)
   {
-    table_ = new Bucket[other.bucketCount_];
-    for (int i = 0; i < bucketCount_; ++i)
+    HashTable< Key, Value, Hash > temp(other.bucketCapacity_);
+    for (int i = 0; i < bucketCapacity_; ++i)
     {
-      table_[i] = other.table_[i];
+      temp.table_[i] = other.table_[i];
     }
+
+    std::swap(table_, temp.table_);
   }
 
   template< class Key, class Value, class Hash >
@@ -84,25 +132,25 @@ namespace Table
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::const_iterator HashTable< Key, Value, Hash >::cend() const
   {
-    return HashTable::const_iterator(table_ + bucketCount_, table_ + bucketCount_);
+    return HashTable::const_iterator(table_ + bucketCapacity_, table_ + bucketCapacity_);
   }
 
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::const_iterator HashTable< Key, Value, Hash >::cbegin() const
   {
-    return HashTable::const_iterator(table_, table_ + bucketCount_);
+    return HashTable::const_iterator(table_, table_ + bucketCapacity_);
   }
 
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::iterator HashTable< Key, Value, Hash >::end()
   {
-    return HashTable::iterator(table_ + bucketCount_, table_ + bucketCount_);
+    return HashTable::iterator(table_ + bucketCapacity_, table_ + bucketCapacity_);
   }
 
   template< class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::iterator HashTable< Key, Value, Hash >::begin()
   {
-    return HashTable::iterator(table_, table_ + bucketCount_);
+    return HashTable::iterator(table_, table_ + bucketCapacity_);
   }
 
   template< class Key, class Value, class Hash >
@@ -113,17 +161,28 @@ namespace Table
 
   template < class Key, class Value, class Hash >
   HashTable< Key, Value, Hash >::HashTable(std::size_t capacity):
-    bucketCount_(capacity)
+    bucketCapacity_(capacity),
+    loadFactor_(0)
   {
-    table_ = new Bucket[bucketCount_];
+    table_ = new Bucket[bucketCapacity_];
   }
 
   template < class Key, class Value, class Hash >
-  std::pair< Value&, bool > HashTable< Key, Value, Hash >::insert(const Key& key, const Value& value)
+  std::pair< HashTableIterator< Key, Value, Hash >, bool > HashTable< Key, Value, Hash >::insert(const Key& key, const Value& value)
   {
-    Bucket& bucket = table_[getHash(key)];
+    if (bucketCapacity_ - loadFactor_ <= 0)
+    {
+      rehash(bucketCapacity_ * 2);
+    }
+    std::size_t hash = getHash(key);
+    Bucket& bucket = table_[hash];
     const auto& insertionResult = bucket.insert(Pair{key, value});
-    return std::pair< Value&, bool >((*insertionResult.first).value_, insertionResult.second);
+    if (insertionResult.second)
+    {
+      ++loadFactor_;
+    }
+    iterator hashTableIt = HashTableIterator< Key, Value, Hash >(table_ + hash, table_ + bucketCapacity_, insertionResult.first);
+    return {hashTableIt, insertionResult.second};
   }
 
   template < class Key, class Value, class Hash >
@@ -132,7 +191,7 @@ namespace Table
     hash = Hash{}(key);
   }
   {
-    return Hash{}(key) % bucketCount_;
+    return Hash{}(key) % bucketCapacity_;
   }
 
   template < class Key, class Value, class Hash >
@@ -146,7 +205,7 @@ namespace Table
         return pair.value_;
       }
     }
-    return insert(key).first;
+    return insert(key).first->value_;
   }
 }
 

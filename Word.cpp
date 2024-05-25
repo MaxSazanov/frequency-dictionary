@@ -16,7 +16,6 @@ bool Word::operator==(const Word& other) const
   return other.str_[i] == '\0';
 }
 
-
 std::ostream& operator<<(std::ostream& out, Word& word)
 {
   out << word.str_;

@@ -14,7 +14,7 @@ namespace List
   public:
     LinkedList();
     LinkedList(LinkedList&& other) noexcept;
-    LinkedList(const LinkedList& other) = delete;
+    LinkedList(const LinkedList& other);
     ~LinkedList();
 
     LinkedList& operator=(const LinkedList& other);
@@ -37,10 +37,25 @@ namespace List
   private:
     Node<T>* head_;
 
-    Node<T>* searchPrevious(const T& requiredData) const;
-    Node<T>* searchFrom(Node< T >* begin, const T& requiredData) const;
-    std::pair<iterator, bool> insertAfter(Node< T >* begin, Node< T >* newNode);
+    Node< T >* searchPrevious(const T& requiredData) const;
+    Node< T >* searchFrom(Node< T >* begin, const T& requiredData) const;
+    std::pair< iterator, bool > insertAfter(Node< T >* begin, Node< T >* newNode);
   };
+
+  template<class T>
+  LinkedList<T>::LinkedList(const LinkedList& other):
+    head_(nullptr)
+  {
+    LinkedList< T > temp;
+    Node< T >* otherCurr = other.head_;
+    while (otherCurr != nullptr)
+    {
+      temp.insert(otherCurr->data_);
+      otherCurr = otherCurr->next_;
+    }
+
+    std::swap(head_, temp.head_);
+  }
 
   template< class T >
   LinkedList< T >::LinkedList() :
@@ -68,16 +83,17 @@ namespace List
   template< class T >
   LinkedList< T >& LinkedList< T >::operator=(const LinkedList& other)
   {
-    if (head_ != nullptr)
+    if (this != &other)
     {
-      delete this;
-    }
+      LinkedList< T > temp;
+      Node< T >* otherCurr = other.head_;
+      while (otherCurr != nullptr)
+      {
+        temp.insert(otherCurr->data_);
+        otherCurr = otherCurr->next_;
+      }
 
-    Node< T >* otherCurr = other.head_;
-    while (otherCurr != nullptr)
-    {
-      insert(otherCurr->data_);
-      otherCurr = otherCurr->next_;
+      std::swap(head_, temp.head_);
     }
     return *this;
   }

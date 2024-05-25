@@ -16,13 +16,20 @@ namespace Table
   {
     friend class HashTable< Key, Value, Hash >;
   public:
-    HashTableIterator(const HashTableIterator& it);
+    HashTableIterator(const HashTableIterator& other);
+    HashTableIterator& operator=(const HashTableIterator& other);
 
     bool operator!=(const HashTableIterator& other) const;
     bool operator==(const HashTableIterator& other) const;
-    Pair< Key, Value >& operator*() const;
 
+    using Value_type =  Pair< Key, Value >;
+    using Reference = Value_type&;
+    using Pointer = Value_type*;
+
+    Reference operator*() const;
+    Pointer operator->() const;
     HashTableIterator& operator++();
+    HashTableIterator operator++(int);
   private:
     using Bucket = LinkedList< Pair< Key, Value > >;
 
@@ -31,7 +38,46 @@ namespace Table
     Bucket::iterator listIterator_ = bucket_->begin();
 
     explicit HashTableIterator(Bucket* bucket, Bucket* end);
+    explicit HashTableIterator(Bucket* bucket, Bucket* end, LinkedListIterator< Pair< Key, Value > > iterator);
   };
+
+  template<class Key, class Value, class Hash>
+  HashTableIterator<Key, Value, Hash>::HashTableIterator(Bucket* bucket, Bucket* end, LinkedListIterator< Pair< Key, Value > > iterator):
+    bucket_(bucket),
+    end_(end),
+    listIterator_(iterator)
+  {
+    if (listIterator_ == bucket_->end() && bucket_ != end_)
+    {
+      ++(*this);
+    }
+  }
+
+  template<class Key, class Value, class Hash>
+  HashTableIterator<Key, Value, Hash> HashTableIterator<Key, Value, Hash>::operator++(int)
+  {
+    HashTableIterator<Key, Value, Hash> temp(*this);
+    ++(*this);
+    return temp;
+  }
+
+  template<class Key, class Value, class Hash>
+  HashTableIterator<Key, Value, Hash>::Pointer HashTableIterator<Key, Value, Hash>::operator->() const
+  {
+    return listIterator_.operator->();
+  }
+
+  template<class Key, class Value, class Hash>
+  HashTableIterator< Key, Value, Hash >& HashTableIterator<Key, Value, Hash>::operator=(const HashTableIterator& other)
+  {
+    if (this != &other)
+    {
+      bucket_ = other.bucket_,
+      end_ = other.end_;
+      listIterator_ = other.listIterator_;
+    }
+    return *this;
+  }
 
   template< class Key, class Value, class Hash >
   HashTableIterator< Key, Value, Hash >::HashTableIterator(Bucket* bucket, Bucket* end) :
@@ -46,9 +92,10 @@ namespace Table
   }
 
   template< class Key, class Value, class Hash >
-  HashTableIterator< Key, Value, Hash >::HashTableIterator(const HashTableIterator& it) :
-    bucket_(it.bucket_),
-    listIterator_(it.listIterator_)
+  HashTableIterator< Key, Value, Hash >::HashTableIterator(const HashTableIterator& other) :
+    bucket_(other.bucket_),
+    end_(other.end_),
+    listIterator_(other.listIterator_)
   {}
 
   template< class Key, class Value, class Hash >
